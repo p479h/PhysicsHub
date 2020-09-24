@@ -8,7 +8,8 @@ in more than one dimension.
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-
+canvas.HEIGHT= canvas.height;
+canvas.WIDTH= canvas.width;
 function body(x, y, vx, vy, r=50){
   //This is a square body
   this.x = x; // x, y -> Center of circle
@@ -63,16 +64,16 @@ body.prototype.moveAll = function(dt = 1){
 
 body.prototype.wallDetectionAndHandling = function(){
   /*This bounces the object from the wall.*/
-  if (this.x+this.r>canvas.width){
+  if (this.x+this.r>canvas.WIDTH){
     this.vx*=-1;
-    this.x = canvas.width - this.r;
+    this.x = canvas.WIDTH - this.r;
   } else if (this.x -this.r<0){
     this.vx*=-1;
     this.x = this.r;
   };
-  if (this.y+this.r>canvas.height){
+  if (this.y+this.r>canvas.HEIGHT){
     this.vy*=-1;
-    this.y = canvas.height-this.r;
+    this.y = canvas.HEIGHT-this.r;
   } else if (this.y -this.r<0){
     this.vy*=-1;
     this.y = this.r;
@@ -153,8 +154,8 @@ body.prototype.collideWith = function(b2){
 
 
 // We test it in our loop with a lot of balls
-let b1 = new body(90,canvas.height- 50, 1, 0,20);
-let b2 = new body(400,canvas.height- 50, -1, 0,20);
+let b1 = new body(90,canvas.HEIGHT- 50, 1, 0,20);
+let b2 = new body(400,canvas.HEIGHT- 50, -1, 0,20);
 
 for (let i=0; i<6; i++){
   let b = new body(i*30, i*30, 1, i, 20);
@@ -164,7 +165,7 @@ for (let i=0; i<6; i++){
 let interval = setInterval(
   ()=>{
     /*Erase canvas */
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.WIDTH, canvas.WIDTH);
 
     //THIS IS THE NEW FUNCTION
     b1.wallDetectionAndHandlingAll();
@@ -195,13 +196,15 @@ function generateColor(){
 
 
 /*
-With this, you have officially seen how any simulation
-starts. You just have to get the basis of the simualtion
-working without glitches. Then, you just decorate it with
-fancy things of your liking!
-
-P.S. If you are reaaaaally ambitious, you can also keep
-going from here. Instead of decoration, you can further
-expand this to 3 dimensions! It is your simulaiton afterall.
-The sky -- > Universe is the limit (considering it is endless)
+THis is where I apply the canvas transforms
 */
+
+window.onload =()=>{
+const ref2 = document.getElementById("beaultify");
+ref2.onclick = ()=>{
+  const ratio = 3;
+  canvas.height*=ratio;
+  canvas.width*=ratio;
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+};
+};
