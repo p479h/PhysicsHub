@@ -1,0 +1,51 @@
+<DOCTYPE! html>
+<!--This is the basic setup to start writting simulations.
+Notice how I made the background of the canvas dark form
+stylistic preference.
+
+The canvas below will be accessible from within js. Hence
+we will be able to draw anything we want.-->
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css"></link>
+	</head>
+	<body>
+		<nav>
+			<div class="nav">
+				<img src="dependencies/euler.svg"></img>
+			</div>
+		</nav>
+		<div class="explanation">
+			<h2>Canvas transformations</h2>
+			<p>Here I will discuss only one thing. Canvas transforms. Again.</p>
+			<p>This time I will show implementation of transforms in a more organized
+				manner.</p>
+			<h3>How will canvas transforms affect our drawing?</h3>
+			<p>It is importatnt to analyze this point carefully. You see,
+			so far we have made many choices when coding that relied on the
+			normal field of view for the canvas. But changing it may break the
+			simulation. For example:</p>
+			<p>	The balls bounce off walls, which are defined by the canvas
+			height and width. Changing the transforms will lead to weird effects.</p>
+			<p>Check below what happens to our simulation when we change the scaling
+			of our coordinate system (i.e. when we zoom in). Also note that
+			for application of these transforms I am working in another js file called
+			transforms.js</p>
+		</div>
+		<div class="simContainer">
+			<canvas id="canvas" height="300px" width="500px"></canvas>
+			<div class="commands">
+				<input type="range" max="5" min=".5" step=".1" value="1" id="zoomSlider"></input>
+				<label for="zoomSlider" id="zoomSliderLabel">1</label>
+			</div>
+		</div>
+		<script type="text/javascript" src="lesson.js"></script>
+		<script type="text/javascript" src="transforms.js"></script>
+		<div class="explanation">
+			<p>The same is true for rotation and translation, but of course, it
+			the problem should be clear from the example.
+			In the next html document we will discuss how to solve this issue.
+		</p>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,91 @@
+<DOCTYPE! html>
+<!--This is the basic setup to start writting simulations.
+Notice how I made the background of the canvas dark form
+stylistic preference.
+
+The canvas below will be accessible from within js. Hence
+we will be able to draw anything we want.-->
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css"></link>
+	</head>
+	<body>
+		<nav>
+			<div class="nav">
+				<img src="dependencies/euler.svg"></img>
+			</div>
+		</nav>
+		<div class="explanation">
+			<h2>Canvas transformations and simulation integrity</h2>
+			<p>You see, the problems we had in the last simualtion were
+			due to the fact that many things in the simulation are done
+		  using the 4 corners of the untransformed canvas as a reference.</p>
+			<p>Therefore, it should be obvious that one way to solve this issue
+			would be to use the current canvas transform as a reference to determine
+			the coordinates of the new corners of the viewport. If this was not
+			obvious, it is ok, I have experience. You are still getting it. But I
+			still want you to understand how simple this solution really is.
+			We were using the points (0,0) ... (canvas.width, canvas.height) as the
+			reference of the corners. We will still do it, but we will undo what the
+			transformation matrix did, to obtain the original points in the new coordinates.</p>
+		</div>
+		<div class="simContainer">
+			<img src="dependencies/transforms.svg" alt="OOps, not found">
+			</img>
+		</div>
+		<div class="explanation">
+			<h2>How do we do that? GOOGLE!!!</h2>
+			<p>After 5 min of research I figured out that we can get the
+			matrices of the canvas with `ctx.getTransform()`. Which returns
+			a 3x3 matix. WHhich has an inverse that is complicated so just visit
+			this link: <a href="https://mathworld.wolfram.com/MatrixInverse.html">HERE</a></p>
+			<p>Also look<a href="https://stackoverflow.com/questions/10892267/html5-canvas-transformation-algorithm-finding-object-coordinates-after-applyin"> HERE</a></p>
+			<p>Since this will probably take a while: I have hard coded the inverser:</p>
+			<div class="codeHolder">
+				<pre>
+					const canvas = document.getElementById("canvas");
+					const ctx = canvas.getContext("2d");
+					function invertCoordinates(x, y){
+						const t = ctx.getTransform(); //transform
+						const M = t.a*t.d-t.b*t.c;//Factor that shows a lot
+						const xnew = (x*t.d-y*t.c+t.c*t.f-t.d*t.e)/M;
+						const ynew = (x*t.b+y*t.a+t.b*t.e-t.a*t.f)/M;
+						return [xnew, ynew];
+					};
+				</pre>
+			</div>
+			<p>With that out of the way, I have done the following modifications on the
+			code of the simulation.
+			<p>
+				First I have created an object called universe.
+				This holds the coordinates of the edges of the canvas.
+				These will be updated every time the canvas is transformed.
+				These will be used as a reference instead of the origin and
+				canvas.height and canvas.width. Look the result below!
+			</p>
+		</div>
+		<div class="simContainer">
+			<canvas id="canvas" height="300px" width="500px"></canvas>
+			<div class="commands">
+				<input type="range" max="5" min=".5" step=".01" value="1" id="zoomSlider"></input>
+				<label for="zoomSlider" id="zoomSliderLabel" style="width:5em; display: inline-block;">1</label>
+				<input type="range" max="200" min="-200" step="1" value="0" id="transSlider"></input>
+				<label for="transSlider" id="transSliderLabel" style="width:5em; display: inline-block;">1</label>
+			</div>
+		</div>
+		<script type="text/javascript" src="lesson.js"></script>
+		<script type="text/javascript" src="transforms.js"></script>
+		<div class="explanation">
+			<p>
+				Notice two things however. Applying this solution is not everything one,
+				would like to do. It is not perfect. If you apply a rotation to this
+				for example, it will break. Also, as you proabably noticed, objects
+				disappear when there is no space for them in the canvas or when it
+				shrinks too fast. This happens because two bodies do not like to stay
+				in the same place. But that is what happens when you shrink the universe
+				too quickly. More on the next one. We are ready to start thinking about
+				a grid.
+			</p>
+		</div>
+	</body>
+</html>

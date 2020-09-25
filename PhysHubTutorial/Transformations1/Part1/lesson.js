@@ -12,11 +12,33 @@ part 3;
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.HEIGHT= canvas.height;
-canvas.WIDTH= canvas.width;
-canvas.height/=2;
-canvas.width/=2;
-ctx.setTransform(1/2, 0, 0, 1/2, 0, 0);
+const universe = {
+  x0: 0,
+  y0: 0,
+  x1: canvas.width,
+  y1: canvas.height,
+  h: canvas.height,
+  w: canvas.width,
+};
+universe.updatePoints = function(){
+  const origin = invertCoordinates(0, 0);
+  const rightBottomCorner = invertCoordinates(canvas.width, canvas.height);
+  universe.x0 = origin[0];
+  universe.y0 = origin[1];
+  universe.x1 = rightBottomCorner[0];
+  universe.y1 = rightBottomCorner[1];
+  universe.h = universe.y1-universe.y0;
+  universe.w = universe.x1-universe.x0;
+};
+
+function invertCoordinates(x, y){
+  const t = ctx.getTransform(); //transform
+  const M = t.a*t.d-t.b*t.c;//Factor that shows a lot
+  const xnew = (x*t.d-y*t.c+t.c*t.f-t.d*t.e)/M;
+  const ynew = (x*t.b+y*t.a+t.b*t.e-t.a*t.f)/M;
+  return [xnew, ynew];
+};
+
 function body(x, y, vx, vy, r=50){
   //This is a square body
   this.x = x; // x, y -> Center of circle
@@ -54,7 +76,7 @@ body.prototype.drawAll = function(){
 };
 
 
-body.prototype.move = function(dt = 1){
+body.prototype.move = function(dt = .2){
   //Moves the particle through dt seconds
   this.x+=this.vx*dt;
   this.y+=this.vy*dt;
@@ -71,19 +93,19 @@ body.prototype.moveAll = function(dt = 1){
 
 body.prototype.wallDetectionAndHandling = function(){
   /*This bounces the object from the wall.*/
-  if (this.x+this.r>canvas.WIDTH){
+  if (this.x+this.r>universe.x1){
     this.vx*=-1;
-    this.x = canvas.WIDTH - this.r;
-  } else if (this.x -this.r<0){
+    this.x = universe.x1 - this.r;
+  } else if (this.x -this.r<universe.x0){
     this.vx*=-1;
-    this.x = this.r;
+    this.x = this.r+universe.x0;
   };
-  if (this.y+this.r>canvas.HEIGHT){
+  if (this.y+this.r>universe.y1){
     this.vy*=-1;
-    this.y = canvas.HEIGHT-this.r;
-  } else if (this.y -this.r<0){
+    this.y = universe.y1-this.r;
+  } else if (this.y -this.r<universe.y0){
     this.vy*=-1;
-    this.y = this.r;
+    this.y = this.r+universe.y0;
   };
 };
 
@@ -155,8 +177,8 @@ body.prototype.collideWith = function(b2){
 
 
 // We test it in our loop with a lot of balls
-let b1 = new body(90,canvas.HEIGHT- 50, 1, 0,20);
-let b2 = new body(400,canvas.HEIGHT- 50, -1, 0,20);
+let b1 = new body(90,universe.h- 50, 1, 0,20);
+let b2 = new body(400,universe.h- 50, -1, 0,20);
 
 for (let i=0; i<6; i++){
   let b = new body(i*30, i*30, 1, i, 20);
@@ -202,14 +224,3 @@ function generateColor(){
 /*
 THis is where I apply the canvas transforms
 */
-
-window.onload =()=>{
-const ref2 = document.getElementById("beaultify");
-ref2.onclick = ()=>{
-  const ratio = 3;
-  canvas.height=ratio*canvas.HEIGHT;
-  canvas.width=ratio*canvas.WIDTH;
-  console.log(canvas.height, canvas.width)
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-};
-};

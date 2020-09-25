@@ -1,0 +1,37 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+ <!-- Created with Method Draw - http://github.com/duopixel/Method-Draw/ -->
+
+ <g>
+  <title>background</title>
+  <rect fill="#fff" id="canvas_background" height="602" width="802" y="-1" x="-1"/>
+  <g display="none" overflow="visible" y="0" x="0" height="100%" width="100%" id="canvasGrid">
+   <rect fill="url(#gridpattern)" stroke-width="0" y="0" x="0" height="100%" width="100%"/>
+  </g>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <rect id="svg_2" height="121" width="128" y="82" x="76.835" stroke-width="1.5" stroke="#000" fill="#fff"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_3" y="107" x="82.835" stroke-width="0" stroke="#000" fill="#000000">(x0,y0)</text>
+  <rect id="svg_10" height="121" width="128" y="76" x="393.835" stroke-width="1.5" stroke="#000" fill="#fff"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_11" y="105" x="403.835" stroke-width="0" stroke="#000" fill="#000000">(xt,yt)</text>
+  <rect id="svg_12" height="121" width="128" y="283" x="76.835" stroke-width="1.5" stroke="#000" fill="#fff"/>
+  <text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_13" y="302" x="82.835" stroke-width="0" stroke="#000" fill="#000000">(xi,yi)</text>
+  <rect id="svg_14" height="121" width="128" y="280" x="393.835" stroke-width="1.5" stroke="#000" fill="#fff"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_15" y="299" x="399.835" stroke-width="0" stroke="#000" fill="#000000">(x0,y0)</text>
+  <path stroke="#000" transform="rotate(90 307.21289062500006,155.4062652587891) " id="svg_16" d="m282.7129,155.22639l24.5,-74.76518l24.5,74.76518l-12.25,0l0,75.12493l-24.49999,0l0,-75.12493l-12.25,0z" stroke-width="1.5" fill="#fff"/>
+  <path stroke="#000" transform="rotate(90 299.212890625,337.4062805175782) " id="svg_19" d="m274.7129,337.22639l24.5,-74.76517l24.49999,74.76517l-12.24999,0l0,75.12493l-24.5,0l0,-75.12493l-12.25,0z" stroke-width="1.5" fill="#fff"/>
+  <path id="svg_22" d="m109.835,62" opacity="0.5" stroke-opacity="null" stroke-width="1.5" stroke="#000" fill="#000000"/>
+  <ellipse stroke="#000" ry="19" rx="18" id="svg_23" cy="142" cx="135.835" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#000000"/>
+  <ellipse stroke="#000" ry="27.5" rx="7.5" id="svg_25" cy="351.5" cx="128.335" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#000000"/>
+  <ellipse stroke="#000" ry="19" rx="45" id="svg_26" cy="142" cx="456.83501" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#000000"/>
+  <ellipse stroke="#000" ry="19" rx="18" id="svg_27" cy="353" cx="462.835" fill-opacity="null" stroke-opacity="null" stroke-width="1.5" fill="#000000"/>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_28" y="344" x="237.835" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Transform</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_29" y="164" x="241.835" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Transform</text>
+  <text xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_30" y="464" x="72.835" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">xi = x inverse</text>
+  <text style="cursor: move;" xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_31" y="496" x="74.835" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">xt = x transformed</text>
+  <path stroke="#000" id="svg_32" d="m16.9584,240.61898l28.49997,-71.82719l28.49997,71.82719l-14.24999,0l0,72.17281l-28.49997,0l0,-72.17281l-14.24999,0z" stroke-opacity="null" stroke-width="1.5" fill="#ffffff"/>
+  <text transform="rotate(90 47.06249999999998,249.67187500000003) " xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_33" y="258" x="-7.165" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Transform</text>
+  <path transform="rotate(-180 229.45837402343753,245.79177856445312) " stroke="#000" id="svg_34" d="m200.9584,245.61898l28.49997,-71.8272l28.49997,71.8272l-14.24998,0l0,72.17281l-28.49997,0l0,-72.17281l-14.24999,0z" stroke-opacity="null" stroke-width="1.5" fill="#ffffff"/>
+  <text transform="rotate(90 230.18750000000003,233.671875) " xml:space="preserve" text-anchor="start" font-family="Helvetica, Arial, sans-serif" font-size="24" id="svg_35" y="242" x="190.835" fill-opacity="null" stroke-opacity="null" stroke-width="0" stroke="#000" fill="#000000">Inverse</text>
+ </g>
+</svg>

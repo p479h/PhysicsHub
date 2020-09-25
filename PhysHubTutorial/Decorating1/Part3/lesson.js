@@ -12,11 +12,7 @@ part 3;
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
-canvas.HEIGHT= canvas.height;
-canvas.WIDTH= canvas.width;
-canvas.height/=2;
-canvas.width/=2;
-ctx.setTransform(1/2, 0, 0, 1/2, 0, 0);
+
 function body(x, y, vx, vy, r=50){
   //This is a square body
   this.x = x; // x, y -> Center of circle
@@ -71,16 +67,16 @@ body.prototype.moveAll = function(dt = 1){
 
 body.prototype.wallDetectionAndHandling = function(){
   /*This bounces the object from the wall.*/
-  if (this.x+this.r>canvas.WIDTH){
+  if (this.x+this.r>canvas.width){
     this.vx*=-1;
-    this.x = canvas.WIDTH - this.r;
+    this.x = canvas.width - this.r;
   } else if (this.x -this.r<0){
     this.vx*=-1;
     this.x = this.r;
   };
-  if (this.y+this.r>canvas.HEIGHT){
+  if (this.y+this.r>canvas.height){
     this.vy*=-1;
-    this.y = canvas.HEIGHT-this.r;
+    this.y = canvas.height-this.r;
   } else if (this.y -this.r<0){
     this.vy*=-1;
     this.y = this.r;
@@ -155,8 +151,8 @@ body.prototype.collideWith = function(b2){
 
 
 // We test it in our loop with a lot of balls
-let b1 = new body(90,canvas.HEIGHT- 50, 1, 0,20);
-let b2 = new body(400,canvas.HEIGHT- 50, -1, 0,20);
+let b1 = new body(90,canvas.height- 50, 1, 0,20);
+let b2 = new body(400,canvas.height- 50, -1, 0,20);
 
 for (let i=0; i<6; i++){
   let b = new body(i*30, i*30, 1, i, 20);
@@ -202,14 +198,3 @@ function generateColor(){
 /*
 THis is where I apply the canvas transforms
 */
-
-window.onload =()=>{
-const ref2 = document.getElementById("beaultify");
-ref2.onclick = ()=>{
-  const ratio = 3;
-  canvas.height=ratio*canvas.HEIGHT;
-  canvas.width=ratio*canvas.WIDTH;
-  console.log(canvas.height, canvas.width)
-  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-};
-};
