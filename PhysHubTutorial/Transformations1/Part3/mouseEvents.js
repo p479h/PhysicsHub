@@ -1,4 +1,5 @@
-{const canvas = document.getElementById("canvas");
+{
+const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 //First we create the functions that will act on the canvas

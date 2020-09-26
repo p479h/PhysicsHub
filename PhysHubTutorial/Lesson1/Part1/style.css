@@ -1,0 +1,82 @@
+
+*{
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
+p{
+  margin: 1em 2em 1em 2em;
+}
+canvas{
+  border: 1px solid black;
+  background: black;
+  height: 300px;
+  width: 500px;
+  display: block;
+  margin: auto;
+}
+
+.simContainer{
+  display: block;
+  background-color: gray;
+  padding: 6%;
+  text-align: center;
+}
+.commands{
+  display: block;
+}
+
+.nav{
+  display: block;
+  flex-direction: column;
+  background: #2980B9;
+  padding: 1%;
+}
+.nav img{
+  display: block;
+  margin-left: 1em;
+  height: 5%;
+  color: white;
+}
+.explanation{
+  margin: 2em 10% 2em 10%;
+  display: block;
+  text-align: justify;
+}
+.codeHolder{
+  display: block;
+  background-color: gray;
+  border-radius: 2em;
+  width: 40%;
+  margin:0 auto 0 auto;
+  padding: auto;
+  font-family: monospace;
+  word-wrap: break-word;
+  height: 100%;
+  overflow: auto auto;
+  transition-duration: .1s;
+}
+
+/*BOdy*/
+.codeHolder::-webkit-scrollbar {
+  width: 0px;
+}
+
+.codeHolder:hover::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.codeHolder::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+/* Handle */
+.codeHolder::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+/* Handle on hover */
+.codeHolder::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}

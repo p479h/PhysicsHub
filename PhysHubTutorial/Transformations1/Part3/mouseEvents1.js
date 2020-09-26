@@ -1,4 +1,5 @@
-{const canvas = document.getElementById("canvas1");
+{
+const canvas = document.getElementById("canvas1");
 const ctx = canvas.getContext("2d");
 
 function invertCoordinates(x, y){
