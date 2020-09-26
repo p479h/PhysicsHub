@@ -1,0 +1,385 @@
+<DOCTYPE! html>
+<!--This is the basic setup to start writting simulations.
+Notice how I made the background of the canvas dark form
+stylistic preference.
+
+The canvas below will be accessible from within js. Hence
+we will be able to draw anything we want.-->
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css"></link>
+	</head>
+	<body>
+		<nav>
+			<div class="nav">
+				<img src="dependencies/euler.svg"></img>
+			</div>
+		</nav>
+		<div class="explanation">
+			<h2>Making a draggable GRID!</h2>
+			<p>Making a GRID is essencial to make simulations look not only prettier
+			but also to give impression of scale. Therefoer I present here my method
+			to making a draggable grid. Keep one thing in mind however: Even though
+			I am presenting this as a specific tutorial. If I want you to take one thing
+			out of this, it is the thought process and workflow. Visualize the problem,
+			start simple. Add complexity!</p>
+			<p>With that out of the way, what I envision is a grid of squares
+			of side lengh dw. To start, since we are starting simple. I will model a
+			grid in a untransformed canvas. THEN after I get that done, I will modify it
+			to work on any transform.</p>
+			<h3>Visualizing the problem</h3>
+			<p>This is the problem setup:</p>
+			<div class="simContainer">
+				<img src="dependencies/grid.svg" alt="OOps, not found">
+			</img>
+			<div class="simContainer">
+				<canvas id="canvas0" height="300px" width="500px"></canvas>
+			</div>
+			<script type="text/javascript" src="grid0.js"></script>
+		</div>
+		<div class="explanation">
+			<h2>Code</h2>
+			<p>This is the code. If you do not understand why a certain step was
+			performed. PLEASE, spend at least an hour trying to make your own grid.
+			trying the what you will have to do most often while making physics
+			simulations.</p>
+			<p>Without further ado, here is the code:</p>
+			<div class="codeHolder">
+				<pre>
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
+
+	//The following transformation is just used for better visualization
+	let w = canvas.width;
+	let h = canvas.height;
+	let scale = .8;
+	ctx.setTransform(scale, 0, 0, scale, (w/scale-w)/3, (h/scale-h)/3);
+
+	function drawGrid(){
+	  const dw = 52;
+	  const ncols = Math.ceil(canvas.width/dw);
+	  const nrows = Math.ceil(canvas.height/dw);
+	  const w = ncols*dw;
+	  const h = nrows*dw;
+
+	  //Improving visibility
+	  ctx.strokeStyle = "gray";
+	  ctx.lineWidth = 1;
+
+	  //Now we make the rows
+	  for (let i=0; i<=nrows; i++){
+	    ctx.beginPath();
+	    ctx.moveTo(0, i*dw);
+	    ctx.lineTo(w, i*dw);
+	    ctx.closePath();
+	    ctx.stroke();
+	  };
+
+	  //Now we make the columns
+	  for (let i=0; i<=ncols; i++){
+	    ctx.beginPath();
+	    ctx.moveTo(i*dw, 0);
+	    ctx.lineTo(i*dw, h);
+	    ctx.closePath();
+	    ctx.stroke();
+	  };
+	};
+
+	drawGrid();
+				</pre>
+			</div>
+		</div>
+		<div class="explanation">
+			<h2>Letting transformations in!</h2>
+			<p>
+				First, if you have not seen the section on canvas transforms, go see it.
+			In either case the idea is as follows. Scaling and translating will cause
+			the origin to change location and length scale to change. If we go back
+			to the code snippet above, you will notice that what we do to draw the
+			grid is that we make use of the x and y values of the top left and bottom right of the canvas.</p>
+			<p>
+				Now all we have to do is figure out what the top left and bottom right of the
+				canvas are under the new transformation. Which as shows in the transformation
+				section, can be obtained by passing the old points to the inverse transformation
+				of the canvas. Once this inversely transformed point goes through the transformtion,
+				the transformations will cancel and the points will end up where they started.
+				Follows the updated code snippet.
+			</p>
+		</div>
+		<div class="codeHolder">
+			<pre>
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
+
+	//Now we create an object to hold the reference points
+	const universe = {
+	  x0: 0,
+	  y0: 0,
+	  x1: canvas.width,
+	  y1: canvas.height,
+	  h: canvas.height,
+	  w: canvas.width,
+	};
+
+	universe.updatePoints = function(){
+	  const origin = invertCoordinates(0, 0);
+	  const rightBottomCorner = invertCoordinates(canvas.width, canvas.height);
+	  universe.x0 = origin[0];
+	  universe.y0 = origin[1];
+	  universe.x1 = rightBottomCorner[0];
+	  universe.y1 = rightBottomCorner[1];
+	  universe.h = universe.y1-universe.y0;
+	  universe.w = universe.x1-universe.x0;
+	};
+
+	function invertCoordinates(x, y){
+	  const t = ctx.getTransform(); //transform
+	  const M = t.a*t.d-t.b*t.c;//Factor that shows up a lot
+	  const xnew = (x*t.d-y*t.c+t.c*t.f-t.d*t.e)/M;
+	  const ynew = (x*t.b+y*t.a+t.b*t.e-t.a*t.f)/M;
+	  return [xnew, ynew];
+	};
+
+
+	function drawGrid(){
+	  const dw = 50;
+	  const ncols = Math.ceil(universe.w/dw);
+	  const nrows = Math.ceil(universe.h/dw);
+	  const w = ncols*dw;
+	  const h = nrows*dw;
+
+	  //Improving visibility
+	  ctx.strokeStyle = "gray";
+	  ctx.lineWidth = 1;
+
+	  //Now we make the rows
+	  for (let i=0; i<=nrows; i++){
+	    ctx.beginPath();
+	    ctx.moveTo(universe.x0, universe.y0+i*dw);
+	    ctx.lineTo(universe.x1, universe.y0+i*dw);
+	    ctx.closePath();
+	    ctx.stroke();
+	  };
+
+	  //Now we make the columns
+	  for (let i=0; i<=ncols; i++){
+	    ctx.beginPath();
+	    ctx.moveTo(universe.x0+i*dw, universe.y0);
+	    ctx.lineTo(universe.x0+i*dw, universe.y1);
+	    ctx.closePath();
+	    ctx.stroke();
+	  };
+	};
+
+	//Lets get the slider
+	const zoomSlider = document.getElementById("zoomSlider");
+	const label = document.getElementById("zoomSliderLabel");
+	const transLabel = document.getElementById("transSliderLabel");
+	const transSlider = document.getElementById("transSlider");
+	zoomSlider.oninput = transSlider.oninput = function(){
+	  ctx.resetTransform();
+	  ctx.clearRect(0, 0, canvas.width, canvas.height);
+	  let scale = Number(zoomSlider.value);
+	  let dx = Number(transSlider.value);
+	  //Note that ctx comes from the scope of lesson.js
+	  ctx.setTransform(scale, 0, 0, scale, dx,0);
+	  universe.updatePoints();
+	  drawGrid();
+	  label.innerHTML = scale;
+	  transLabel.innerHTML = dx;
+	};
+
+
+	//We transform the canvas
+	let scale = 2;
+	ctx.setTransform(scale, 0, 0, scale,0, 0);
+
+	//We update the reference points
+	universe.updatePoints();
+
+	//We draw the grid
+	drawGrid();
+			</pre>
+		</div>
+		<div class="explanation">
+			<p>Which yields</p>
+		</div>
+		<div class="simContainer">
+			<canvas id="canvas1" height="300px" width="500px"></canvas>
+		</div>
+		<div class="commands">
+			<input type="range" max="5" min=".5" step=".01" value="1" id="zoomSlider1"></input>
+			<label for="zoomSlider1" id="zoomSliderLabel1" style="width:5em; display: inline-block;">1</label>
+			<input type="range" max="200" min="-200" step="1" value="0" id="transSlider1"></input>
+			<label for="transSlider1" id="transSliderLabel1" style="width:5em; display: inline-block;">1</label>
+		</div>
+		<script type="text/javascript" src="grid1.js"></script>
+		<div class="explanation">
+			<p>Notice that the canvas is not responsive to translations!!!
+			Because we effectively fixed the 4 corners in place. What we
+			actually want to do is to give the user the perspective of a moving
+			grid. This could be done by drawing an infinitely large grid. BUT
+			this is a waste of CPU power.</p>
+			<p>
+				So what we can do is rationalize a solution. So, we do not need
+				all the points in the canvas to be visible at once, so what we
+				can do is translate the canvas -dw every time the canvas is translated
+				exactly n timed dw in any direction. What this does is it lets 1 line get
+				out of the field of view in any direction at a time. When it goes too far
+				it reappears in the other side, giving the impression that the old line left
+				the fiels of view and another line came in on the oposite side. Giving the
+				impression of an infinitely large grid!
+			</p>
+			<p>So we essencially need to modify our drawing of the lines. Instead of drawing
+			the lines relative to the transformed sides, we do it relative to the number of times
+			that dw fits in the translation that led to the transformed side. In other words,
+			we let lines slide until they have slid exactly dw, then we go back to the original
+			position. This can be done by checking how many times the translation gone through an
+			entire dw. So, n is the highest possible integer that devides the traslsation.
+			n = Math.floor(universe.point/dw). The ammount of units that will be added to the
+			transfomed point of the grid will be n*dw. Follows the code with the example grid.</p>
+		</div>
+		<div class="codeHolder">
+			<pre>
+	const canvas = document.getElementById("canvas");
+	const ctx = canvas.getContext("2d");
+
+	//Now we create an object to hold the reference points
+	const universe = {
+	  x0: 0,
+	  y0: 0,
+	  x1: canvas.width,
+	  y1: canvas.height,
+	  h: canvas.height,
+	  w: canvas.width,
+	};
+
+	universe.updatePoints = function(){
+	  const origin = invertCoordinates(0, 0);
+	  const rightBottomCorner = invertCoordinates(canvas.width, canvas.height);
+	  universe.x0 = origin[0];
+	  universe.y0 = origin[1];
+	  universe.x1 = rightBottomCorner[0];
+	  universe.y1 = rightBottomCorner[1];
+	  universe.h = universe.y1-universe.y0;
+	  universe.w = universe.x1-universe.x0;
+	};
+
+	function invertCoordinates(x, y){
+	  const t = ctx.getTransform(); //transform
+	  const M = t.a*t.d-t.b*t.c;//Factor that shows up a lot
+	  const xnew = (x*t.d-y*t.c+t.c*t.f-t.d*t.e)/M;
+	  const ynew = (x*t.b+y*t.a+t.b*t.e-t.a*t.f)/M;
+	  return [xnew, ynew];
+	};
+
+
+	function drawGrid(){
+	  const dw = 50;
+	  const ncols = Math.ceil(universe.w/dw);
+	  const nrows = Math.ceil(universe.h/dw);
+	  const w = ncols*dw;
+	  const h = nrows*dw;
+
+	  //Improving visibility
+	  ctx.strokeStyle = "gray";
+	  ctx.lineWidth = 1;
+
+	  //Now we make the rows
+	  for (let i=0; i<=nrows; i++){
+	    ctx.beginPath();
+	    ctx.moveTo(universe.x0, Math.floor(universe.y0/dw)*dw+i*dw);
+	    ctx.lineTo(universe.x1, Math.floor(universe.y0/dw)*dw+i*dw);
+	    ctx.closePath();
+	    ctx.stroke();
+	  };
+
+	  //Now we make the columns
+	  for (let i=0; i<=ncols; i++){
+	    ctx.beginPath();
+	    ctx.moveTo(Math.floor(universe.x0/dw)*dw+i*dw, universe.y0);
+	    ctx.lineTo(Math.floor(universe.x0/dw)*dw+i*dw, universe.y1);
+	    ctx.closePath();
+	    ctx.stroke();
+	  };
+	};
+
+	//Lets get the slider
+	const zoomSlider = document.getElementById("zoomSlider");
+	const label = document.getElementById("zoomSliderLabel");
+	const transLabel = document.getElementById("transSliderLabel");
+	const transSlider = document.getElementById("transSlider");
+	zoomSlider.oninput = transSlider.oninput = function(){
+	  ctx.resetTransform();
+	  ctx.clearRect(0, 0, canvas.width, canvas.height);
+	  let scale = Number(zoomSlider.value);
+	  let dx = Number(transSlider.value);
+	  //Note that ctx comes from the scope of lesson.js
+	  ctx.setTransform(scale, 0, 0, scale, dx,dx);
+	  universe.updatePoints();
+	  drawGrid();
+	  label.innerHTML = scale;
+	  transLabel.innerHTML = dx;
+	};
+
+
+	//We transform the canvas
+	let scale = 1;
+	ctx.setTransform(scale, 0, 0, scale,0, 0);
+
+	//We update the reference points
+	universe.updatePoints();
+
+	//We draw the grid
+	drawGrid();
+			</pre>
+		</div>
+		<div class="explanation">
+		<p>Lastly, notice the part where we translate n*dw units.
+		That is the same translation being applied to ALL the lines in
+		each loop. Hence we can make the process much more efficient by
+		using a transform before the loop. As follows:
+	</p>
+	<div class="codeHolder">
+		<pre>
+	//Translation to give effect of dragging
+  ctx.translate(0, Math.floor(universe.y0/dw)*dw);
+
+  //Now we make the rows
+  for (let i=0; i<=nrows; i++){
+    ctx.beginPath();
+    ctx.moveTo(universe.x0, i*dw);
+    ctx.lineTo(universe.x1, i*dw);
+    ctx.closePath();
+    ctx.stroke();
+  };
+
+  //Then we undo the previous transformation and apply the next
+  ctx.translate(Math.floor(universe.x0/dw)*dw, -Math.floor(universe.y0/dw)*dw);
+
+  //Now we make the columns
+  for (let i=0; i<=ncols; i++){
+    ctx.beginPath();
+    ctx.moveTo(i*dw, universe.y0);
+    ctx.lineTo(i*dw, universe.y1);
+    ctx.closePath();
+    ctx.stroke();
+  };
+
+  //Translate canvas back!!!!
+  ctx.translate(-Math.floor(universe.x0/dw)*dw, 0);
+		</pre>
+	</div>
+	</div>
+	<div class="simContainer">
+		<canvas id="canvas2" height="300px" width="500px"></canvas>
+		<div class="commands">
+			<input type="range" max="5" min=".5" step=".01" value="1" id="zoomSlider2"></input>
+			<label for="zoomSlider2" id="zoomSliderLabel2" style="width:5em; display: inline-block;">1</label>
+			<input type="range" max="200" min="-200" step="1" value="0" id="transSlider2"></input>
+			<label for="transSlider2" id="transSliderLabel2" style="width:5em; display: inline-block;">1</label>
+		</div>
+	</div>
+	<script type="text/javascript" src="grid2.js"></script>
+	</body>
+</html>
