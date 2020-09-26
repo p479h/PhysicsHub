@@ -9,5 +9,24 @@
 </style>
 <canvas id="canvas" width="500" height="300"></canvas>
 <script type="text/javascript" src="draggableGridWithCollisionDetection.js">
+</script>
+<input type="range" max="5" min=".1" step=".1" value="1" id="quality" ></input>
+<input type="range" max="5" min=".1" step=".1" value="1" id="magnification" ></input>
+
+<script type="text/javascript">
+  const zoom = document.getElementById("magnification");
+  const quality = document.getElementById("quality");
+  function update(){
+    let mag = Number(zoom.value);
+    let resolution = Number(quality.value);
+    ctx.resetTransform();
+    canvas.height = 300;
+    canvas.width = 500;
+    universe.scale = 1;
+    improveImage(resolution);
+    ctx.scale(mag, mag);
+    universe.updatePoints();
+  };
+  zoom.oninput = quality.oninput = update;
 
 </script>

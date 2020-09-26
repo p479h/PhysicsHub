@@ -49,7 +49,7 @@ function improveImage(scale=2){
   canvas.width*=scale;
   canvas.height*=scale;
   ctx.scale(scale, scale);
-  universe.scale*= scale;
+  universe.scale*=scale;
   universe.updatePoints();
 };
 
