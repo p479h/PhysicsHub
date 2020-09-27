@@ -368,8 +368,8 @@ body.prototype.unSelectBody = ()=> {
 
 body.prototype.evolve = function(){
   const b = body.prototype;
-  b.checkAndHandleCollisionAll(); //Must be first!!
-  b.wallDetectionAndHandlingAll(); //Ensures nothing moves inside the wall!!! This breaks everything!!!!
+  b.wallDetectionAndHandlingAll();
+  b.checkAndHandleCollisionAll();
   b.moveAll();
   b.drawAll();
   b.drawVArrowAll();
@@ -396,17 +396,11 @@ improveImage(2);
 //Lets make a loop of events
 let interval = setInterval(
   ()=>{
-    // body.prototype.evolve();
-    // body.prototype.evolve();
-    for (let b of body.prototype.bodies){
-      if (typeof b.vx == NaN){
-        console.log(b);
-        clearInterval(interval);
-      };
-    };
     clearCanvas();
     drawGrid();
-    body.prototype.evolve();
+    if (running){
+      body.prototype.evolve();
+    };
   },10
 );
 
