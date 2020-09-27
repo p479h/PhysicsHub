@@ -94,18 +94,28 @@ function drawGrid(sideLen=50){
   ctx.translate(-Math.floor(universe.x0/dw)*dw, 0);
 };
 
+//Better control
+canvasMouseIn = function(){
+  canvas.isMouseOver = true;
+};
+
+//Better controls. We do not want to mix page and canvas functionality
+canvasMouseOut = function(){
+  canvas.isMouseOver = false;
+};
 
 
 //Now the functons involving canvas interactivity
 function canvasPressed(e){
   //Set required tags and save required values
+  if (!canvas.isMouseOver){return;};
   canvas.isPressed = true;
   canvas.clickedCoords = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
   canvas.initTransform = ctx.getTransform();
 };
 
 function canvasDragged(e){
-  if (!canvas.isPressed){return;};
+  if (!canvas.isPressed || !canvas.isMouseOver){return;};
 
   //Update the reference coordinates in universe
   universe.updatePoints();
@@ -123,6 +133,15 @@ function canvasReleased(){
   canvas.isPressed = false;
 };
 
+
+//Zoomming in and out
+function canvasWheel(e){
+  const t = ctx.getTransform();
+  console.log(t);
+  const change = e.deltaY/1000;
+  ctx.setTransform(t.a+change,t.b,t.c,t.d+change, t.e,t.f);
+  universe.updatePoints();
+};
 
 
 //Now our beloved body class
@@ -219,6 +238,34 @@ body.prototype.checkAndHandleCollisionAll = function(){
   };
 };
 
+body.prototype.drawVArrow = function(){
+  const speed = Math.sqrt(this.vx**2+this.vy**2);
+  const sin = this.vy/speed;
+  const cos = this.vx/speed;
+  const len = 40*speed;
+  const h = 3; //sideHeight of arrow
+  ctx.strokeStyle = ctx.fillStyle = this.strokeStyle;
+  ctx.transform(cos, sin, -sin, cos, this.x, this.y);
+  ctx.beginPath();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(len, 0);
+  ctx.lineTo(len, -h);
+  ctx.lineTo(len+2*h, 0);
+  ctx.lineTo(len, h);
+  ctx.lineTo(len, 0);
+  ctx.closePath();
+  ctx.stroke();
+  ctx.fill();
+  ctx.transform(cos, -sin, sin, cos, 0, 0);
+  ctx.translate(-this.x, -this.y);
+};
+
+
+body.prototype.drawVArrowAll = () =>{
+  for (let b of body.prototype.bodies){
+    b.drawVArrow();
+  };
+};
 
 /*
 NOTE:
@@ -317,6 +364,7 @@ body.prototype.evolve = function(){
   b.checkAndHandleCollisionAll();
   b.moveAll();
   b.drawAll();
+  b.drawVArrowAll();
 };
 
 
@@ -378,3 +426,6 @@ function mouseReleased(e){
 canvas.addEventListener("mousedown", mousePressed);
 canvas.addEventListener("mousemove", mouseDragged);
 canvas.addEventListener("mouseup", mouseReleased);
+canvas.addEventListener("mouseenter", canvasMouseIn);
+canvas.addEventListener("mouseleave", canvasMouseOut);
+canvas.addEventListener("wheel", canvasWheel);
