@@ -1,12 +1,30 @@
 
 
-//First we create the canvas and the function for the grid.
-//Here we also make the
+//First we take the canvas from the document.
+if (document.getElementsByTagName("canvas").length>0){
+  const canvas = document.getElementsByTagName("canvas")[0];
+  canvas.id = "canvas";
+} else {
+  //If there are no canvas in the document, we make one.
+  const canvas = document.createElement("canvas");
+  document.body.appendChild(canvas);
+  canvas.id = "canvas";
+  canvas.style = "height: 300px;width: 500px;border: 1px solid black;background: black;display: block;";
+  canvas.width = 500;
+  canvas.height = 300;
+};
+
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 let running = true;//So we can pause the simulation
 
+
+//Now we modify the canvas to simulate a p5 canvas
+canvas.elt = canvas;
+
+
 //Now we create an object to hold the reference points
+//These are used for actions that depend on the transfomed corners of the canvas
 const universe = {
   x0: 0,
   y0: 0,
@@ -17,6 +35,8 @@ const universe = {
   scale: 1,
 };
 
+
+//Updated universe after a transformation has been applied to the canvas
 universe.updatePoints = function(){
   const origin = invertCoordinates(0, 0);
   const rightBottomCorner = invertCoordinates(canvas.width, canvas.height);
@@ -28,6 +48,7 @@ universe.updatePoints = function(){
   universe.w = universe.x1-universe.x0;
 };
 
+//Gives the coordinates of x,y with inverse transform to the canvas transform
 function invertCoordinates(x, y){
   const t = ctx.getTransform(); //transform
   const M = t.a*t.d-t.b*t.c;//Factor that shows up a lot
@@ -45,6 +66,7 @@ function clearCanvas(){
 };
 
 
+//Changes canvas dimensions and transform to improve image quality
 function improveImage(scale=2){
   //Improve resolution
   canvas.width*=scale;
@@ -95,12 +117,12 @@ function drawGrid(sideLen=50){
   ctx.translate(-Math.floor(universe.x0/dw)*dw, 0);
 };
 
-//Better control
+//Canvas functions must not take action when the cursor lies outside the canvas
 canvasMouseIn = function(){
   canvas.isMouseOver = true;
 };
 
-//Better controls. We do not want to mix page and canvas functionality
+//Canvas functions must not take action when the cursor lies outside the canvas
 canvasMouseOut = function(){
   canvas.isMouseOver = false;
 };
@@ -115,6 +137,8 @@ function canvasPressed(e){
   canvas.initTransform = ctx.getTransform();
 };
 
+
+//Function that changes canvas attributes upon mouse drag
 function canvasDragged(e){
   if (!canvas.isPressed || !canvas.isMouseOver){return;};
 
@@ -130,6 +154,7 @@ function canvasDragged(e){
   ctx.translate(dx, dy);
 };
 
+//Handles mouse release actions that affect the canvas
 function canvasReleased(){
   canvas.isPressed = false;
 };
@@ -181,6 +206,7 @@ body.prototype.draw = function(){
   ctx.stroke();
 };
 
+//Draws all bodies
 body.prototype.drawAll = function(){
   //First we make sure the canvas fits out objects specifications
   for (let b of body.prototype.bodies){
@@ -188,22 +214,24 @@ body.prototype.drawAll = function(){
   };
 };
 
-
+//Moves the body that has this funciton called by as a method!
 body.prototype.move = function(dt = 1){
   //Moves the particle through dt seconds
   this.x+=this.vx*dt;
   this.y+=this.vy*dt;
 };
 
+//Moves all bodies.
 body.prototype.moveAll = function(dt = 1){
   //Does the same as move, but to all blocks
   for (let b of body.prototype.bodies){
-    b.move();
+    b.move(dt);
   };
 };
 
 
-
+//Detects wall collisions and handles them
+//Walls are the sides of the canvas
 body.prototype.wallDetectionAndHandling = function(){
   /*This bounces the object from the wall.*/
   if (this.x+this.r>universe.x1){
@@ -222,6 +250,7 @@ body.prototype.wallDetectionAndHandling = function(){
   };
 };
 
+//Checks and handles wall collisions for all the bodies
 body.prototype.wallDetectionAndHandlingAll = function(){
   //Does the same as move, but to all blocks
   for (let b of body.prototype.bodies){
@@ -229,9 +258,10 @@ body.prototype.wallDetectionAndHandlingAll = function(){
   };
 };
 
-
+//Used to get access to all the bodies
 body.prototype.bodies = []; //Notice every created object ends here
 
+//Checks the collisions for all bodies with all other bodies
 body.prototype.checkAndHandleCollisionAll = function(){
   const bodies = body.prototype.bodies;
   for (let i=0; i < bodies.length-1; i++){
@@ -245,8 +275,10 @@ body.prototype.checkAndHandleCollisionAll = function(){
   };
 };
 
+//Draws arror that give an indication of relative velocity
 body.prototype.drawVArrow = function(){
   const speed = Math.sqrt(this.vx**2+this.vy**2);
+  if (speed==0){return;};
   const sin = this.vy/speed;
   const cos = this.vx/speed;
   const len = 40*speed;
@@ -268,7 +300,7 @@ body.prototype.drawVArrow = function(){
   ctx.translate(-this.x, -this.y);
 };
 
-
+//Draws velocity arrows for all bodies
 body.prototype.drawVArrowAll = () =>{
   for (let b of body.prototype.bodies){
     b.drawVArrow();
@@ -312,11 +344,19 @@ body.prototype.collideWith = function(b2){
   b2.vx = newVx2; b2.vy = newVy2;
 
   //Make the balls no longer overlap
+  //This step is VERY important
   const dist = Math.sqrt(r);
-  b2.x = this.x+(this.r+ b2.r)*x12/dist;
-  b2.y = this.y+(this.r+ b2.r)*y12/dist;
+  const xvec = (this.r+b2.r)*x12/dist;
+  const yvec = (this.r+b2.r)*y12/dist;
+  const xinit = b2.x;
+  const yinit = b2.y;
+  b2.x = this.x+xvec;
+  b2.y = this.y+yvec;
+  this.x = xinit-xvec;
+  this.y = yinit-yvec;
 };
 
+//Random rbg color generator
 function generateColor(){
   let color = `rgb( ${Math.random()*255},
                       ${Math.random()*255},
@@ -338,6 +378,7 @@ body.prototype.isMouseOver = function(e){
   return false;
 };
 
+//Selects a body
 body.prototype.selectBody = (b)=> {
   body.prototype.selectedBody = b;
   b.originalStroke = b.strokeStyle;
@@ -346,16 +387,19 @@ body.prototype.selectBody = (b)=> {
   b.isBeingDragged = true;
 };
 
+//Makes a body ready to be dragged by the mouse
 body.prototype.startDragging = () =>{
   if (!body.prototype.selectedBody){return};
   body.prototype.selectedBody.isBeingDragged = true;
 };
 
+//Makes a body undraggable
 body.prototype.stopDragging = () =>{
   if (!body.prototype.selectedBody){return};
   body.prototype.selectedBody.isBeingDragged = false;
 };
 
+//Makes body return to unselected state
 body.prototype.unSelectBody = ()=> {
   if (!body.prototype.selectedBody){return;};
   const b = body.prototype.selectedBody;
@@ -366,6 +410,7 @@ body.prototype.unSelectBody = ()=> {
   body.prototype.selectedBody = undefined;
 };
 
+//Applies many functions to make the system evolve in time
 body.prototype.evolve = function(){
   const b = body.prototype;
   b.checkAndHandleCollisionAll(); //Must be first!!
@@ -375,7 +420,7 @@ body.prototype.evolve = function(){
   b.drawVArrowAll();
 };
 
-
+//Makes a body move to where the mouse is
 body.prototype.moveToMouse = (e)=>{
   const b = body.prototype.selectedBody;
   const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
@@ -398,12 +443,6 @@ let interval = setInterval(
   ()=>{
     // body.prototype.evolve();
     // body.prototype.evolve();
-    for (let b of body.prototype.bodies){
-      if (typeof b.vx == NaN){
-        console.log(b);
-        clearInterval(interval);
-      };
-    };
     clearCanvas();
     drawGrid();
     body.prototype.evolve();
@@ -421,6 +460,7 @@ function mousePressed(e){
   canvasPressed(e);
 };
 
+//Canvas mouse drag handler
 function mouseDragged(e){
   if (body.prototype.selectedBody){
     if (body.prototype.selectedBody.isBeingDragged){
@@ -432,12 +472,14 @@ function mouseDragged(e){
   };
 };
 
+//Canvas mouse release handler
 function mouseReleased(e){
   body.prototype.stopDragging();
   canvasReleased(e);
 };
 
 
+//Adding event listeners
 canvas.addEventListener("mousedown", mousePressed);
 canvas.addEventListener("mousemove", mouseDragged);
 canvas.addEventListener("mouseup", mouseReleased);
