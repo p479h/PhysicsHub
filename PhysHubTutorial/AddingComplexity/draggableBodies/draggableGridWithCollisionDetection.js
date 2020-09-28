@@ -15,7 +15,7 @@ if (document.getElementsByTagName("canvas").length>0){
 };
 
 const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d", {alpha: false});//alpha false optimizes
 let running = true;//So we can pause the simulation
 
 
@@ -40,10 +40,10 @@ const universe = {
 universe.updatePoints = function(){
   const origin = invertCoordinates(0, 0);
   const rightBottomCorner = invertCoordinates(canvas.width, canvas.height);
-  universe.x0 = origin[0];
-  universe.y0 = origin[1];
-  universe.x1 = rightBottomCorner[0];
-  universe.y1 = rightBottomCorner[1];
+  universe.x0 = Math.floor(origin[0]);//Integers are more efficient
+  universe.y0 = Math.floor(origin[1]);
+  universe.x1 = Math.floor(rightBottomCorner[0]);
+  universe.y1 = Math.floor(rightBottomCorner[1]);
   universe.h = universe.y1-universe.y0;
   universe.w = universe.x1-universe.x0;
 };
@@ -93,25 +93,20 @@ function drawGrid(sideLen=50){
   ctx.translate(0, Math.floor(universe.y0/dw)*dw);
 
   //Now we make the rows
-  for (let i=0; i<=nrows; i++){
-    ctx.beginPath();
+  for (var i=0; i<=nrows; i++){
     ctx.moveTo(universe.x0, i*dw);
     ctx.lineTo(universe.x1, i*dw);
-    ctx.closePath();
-    ctx.stroke();
   };
 
   //Then we undo the previous transformation and apply the next
   ctx.translate(Math.floor(universe.x0/dw)*dw, -Math.floor(universe.y0/dw)*dw);
 
   //Now we make the columns
-  for (let i=0; i<=ncols; i++){
-    ctx.beginPath();
+  for (var i=0; i<=ncols; i++){
     ctx.moveTo(i*dw, universe.y0);
     ctx.lineTo(i*dw, universe.y1);
-    ctx.closePath();
-    ctx.stroke();
   };
+  ctx.stroke();
 
   //Translate canvas back!!!!
   ctx.translate(-Math.floor(universe.x0/dw)*dw, 0);
@@ -209,7 +204,7 @@ body.prototype.draw = function(){
 //Draws all bodies
 body.prototype.drawAll = function(){
   //First we make sure the canvas fits out objects specifications
-  for (let b of body.prototype.bodies){
+  for (var b of body.prototype.bodies){
     b.draw();
   };
 };
@@ -224,7 +219,7 @@ body.prototype.move = function(dt = 1){
 //Moves all bodies.
 body.prototype.moveAll = function(dt = 1){
   //Does the same as move, but to all blocks
-  for (let b of body.prototype.bodies){
+  for (var b of body.prototype.bodies){
     b.move(dt);
   };
 };
@@ -253,7 +248,7 @@ body.prototype.wallDetectionAndHandling = function(){
 //Checks and handles wall collisions for all the bodies
 body.prototype.wallDetectionAndHandlingAll = function(){
   //Does the same as move, but to all blocks
-  for (let b of body.prototype.bodies){
+  for (var b of body.prototype.bodies){
     b.wallDetectionAndHandling();
   };
 };
@@ -264,10 +259,10 @@ body.prototype.bodies = []; //Notice every created object ends here
 //Checks the collisions for all bodies with all other bodies
 body.prototype.checkAndHandleCollisionAll = function(){
   const bodies = body.prototype.bodies;
-  for (let i=0; i < bodies.length-1; i++){
-    for (let j=i+1; j < bodies.length; j++){
-      let b1 = bodies[i];
-      let b2 = bodies[j];
+  for (var i=0; i < bodies.length-1; i++){
+    for (var j=i+1; j < bodies.length; j++){
+      const b1 = bodies[i];
+      const b2 = bodies[j];
       if (Math.sqrt((b1.x-b2.x)**2+(b1.y-b2.y)**2) < b1.r+b2.r){
         b1.collideWith(b2);//This function does anything we want after collision
       };
@@ -302,7 +297,7 @@ body.prototype.drawVArrow = function(){
 
 //Draws velocity arrows for all bodies
 body.prototype.drawVArrowAll = () =>{
-  for (let b of body.prototype.bodies){
+  for (var b of body.prototype.bodies){
     b.drawVArrow();
   };
 };
@@ -358,7 +353,7 @@ body.prototype.collideWith = function(b2){
 
 //Random rbg color generator
 function generateColor(){
-  let color = `rgb( ${Math.random()*255},
+  const color = `rgb( ${Math.random()*255},
                       ${Math.random()*255},
                       ${Math.random()*255})`;
   return color;
@@ -368,7 +363,7 @@ function generateColor(){
 //Now we check for mouseclick
 body.prototype.isMouseOver = function(e){
   const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
-  for (let b of body.prototype.bodies){
+  for (var b of body.prototype.bodies){
     if ((b.x-point[0])**2+(b.y-point[1])**2<b.r**2){
       body.prototype.unSelectBody();
       body.prototype.selectBody(b);
@@ -430,30 +425,23 @@ body.prototype.moveToMouse = (e)=>{
 
 
 //Lets make some bodies
-for (let i=0; i < 7; i++){
-  for (let j =0; j<7; j++){
-    let b = new body(i*60, j*60, Math.random()**6-Math.random()**6, Math.random()**6-Math.random()**6, Math.random()*8+10);
+for (var i=0; i < 7; i++){
+  const rand = Math.random;
+  for (var j =0; j<7; j++){
+    const x = i*60;
+    const y = j*60;
+    const vx = rand()**6-rand()**6;
+    const vy = rand()**6-rand()**6;
+    const r = Math.floor(rand()*8+10);
+    const b = new body(x, y, vx, vy, r);
     b.m = i*.2+1;
   };
 };
 
-//Lets make the canvas look fantastisch
-improveImage(2);
-
-//Lets make a loop of events
-let interval = setInterval(
-  ()=>{
-    // body.prototype.evolve();
-    // body.prototype.evolve();
-    clearCanvas();
-    drawGrid();
-    body.prototype.evolve();
-  },10
-);
 
 //Lets attach some mouseEvents to the canvas
 function mousePressed(e){
-  let b = body.prototype.selectedBody;
+  const b = body.prototype.selectedBody;
   if (body.prototype.isMouseOver(e)){
     body.prototype.startDragging();
     return;
@@ -488,3 +476,16 @@ canvas.addEventListener("mouseup", mouseReleased);
 canvas.addEventListener("mouseenter", canvasMouseIn);
 canvas.addEventListener("mouseleave", canvasMouseOut);
 canvas.addEventListener("wheel", canvasWheel);
+
+
+//Lets make the canvas look fantastisch
+improveImage(2);
+
+//Now we begin the simulation
+function run(){
+  clearCanvas();
+  drawGrid();
+  body.prototype.evolve();
+  requestAnimationFrame(run);
+};
+run();

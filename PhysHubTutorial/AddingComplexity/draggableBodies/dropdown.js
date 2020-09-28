@@ -181,7 +181,7 @@ function updateColor(){
   updateSliderLabels();
 };
 
-for (let sliderContainer of [redSliderContainer,
+for (var sliderContainer of [redSliderContainer,
                               blueSliderContainer,
                               greenSliderContainer]){
   sliderContainer.slider.oninput = updateColor;
@@ -221,7 +221,7 @@ function addBody(e){
 //Lets attach some mouseEvents to the canvas
 function mousePressed(e){
   if (!canvas.isMouseOver){return;};
-  let b = body.prototype.selectedBody;
+  const b = body.prototype.selectedBody;
   if (body.prototype.isMouseOver(e)){
     body.prototype.startDragging();
     return;
