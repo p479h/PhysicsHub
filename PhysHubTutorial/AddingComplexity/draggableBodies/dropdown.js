@@ -21,6 +21,7 @@ const colorRow = makeRow(parametersItem);
 //Making display items
 const EKRow = makeRow(displayItem);
 const instrucRow = makeRow(displayItem);
+const showVRow = makeRow(displayItem);
 
 //Making the command rows
 const startRow = makeRow(commandsItem);
@@ -46,7 +47,7 @@ const rSliderContainer = makeSlider(rRow, 50, 1, .01, 1, "Radius");
 const mSliderContainer = makeSlider(massRow, 20, 1, .01, 5, "Mass");
 const dampingSliderContainer = makeSlider(dampingRow, 1, 0, .01, 0, "Damp");
 const gSliderContainer = makeSlider(gRow, 10, 0., .01, 0, "g");
-const speedSliderContainer = makeSlider(speedRow, 5, 0.1, .01, 1, "Speed");
+const speedSliderContainer = makeSlider(speedRow, 7, 0.1, .01, 2, "Speed");
 //Colors
 const redSliderContainer = makeSlider(redRow, 255, 0, 1, 0, "Red");
 const greenSliderContainer = makeSlider(greenRow, 255, 0, 1, 0, "Green");
@@ -55,6 +56,7 @@ const blueSliderContainer = makeSlider(blueRow, 255, 0, 1, 0, "Blue");
 //display
 const EKCheckboxContainer = makeCheckbox(EKRow);
 const instrucCheckboxContainer = makeCheckbox(instrucRow);
+const showVCheckboxContainer = makeCheckbox(showVRow);
 
 //Commands
 const startButtonContainer = new buttonContainer(startRow);
@@ -81,6 +83,7 @@ colorItem.setLabel("Colors");
 
 EKCheckboxContainer.setLabel("Show kinetic energy");
 instrucCheckboxContainer.setLabel("Show Instructions");
+showVCheckboxContainer.setLabel("Show velocity");
 removeCheckboxContainer.setLabel("Remove");
 addCheckboxContainer.setLabel("Add");
 
@@ -120,6 +123,9 @@ function updateSliderLabels(){
     sliderContainer.updateValueLabel();
   };
 };
+
+//Setting default
+showVCheckboxContainer.checkbox.checked =true;
 
 //overwritting the original selectBody function
 body.prototype.selectBody = (b)=> {
@@ -200,7 +206,9 @@ body.prototype.evolve = function(){
   };
 
   b.drawAll();
-  b.drawVArrowAll();
+  if (showVCheckboxContainer.checkbox.checked){
+    b.drawVArrowAll();
+  };
 };
 
 

@@ -430,9 +430,11 @@ body.prototype.moveToMouse = (e)=>{
 
 
 //Lets make some bodies
-for (let i=0; i < 5; i++){
-  let b = new body(i*30, i*30, 1/10, i/10, 20);
-  b.m = i*.2+1;
+for (let i=0; i < 7; i++){
+  for (let j =0; j<7; j++){
+    let b = new body(i*60, j*60, Math.random()**6-Math.random()**6, Math.random()**6-Math.random()**6, Math.random()*8+10);
+    b.m = i*.2+1;
+  };
 };
 
 //Lets make the canvas look fantastisch
