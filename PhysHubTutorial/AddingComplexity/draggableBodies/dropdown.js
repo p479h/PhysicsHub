@@ -45,7 +45,7 @@ const vxSliderContainer = makeSlider(vxRow, vmax, -vmax, .01, 0, "Vx");
 const vySliderContainer = makeSlider(vyRow, vmax, -vmax, .01, 0, "Vy");
 const rSliderContainer = makeSlider(rRow, 50, 1, .01, 1, "Radius");
 const mSliderContainer = makeSlider(massRow, 20, 1, .01, 5, "Mass");
-const dampingSliderContainer = makeSlider(dampingRow, 1, 0, .01, 0, "Damp");
+const dampingSliderContainer = makeSlider(dampingRow, 1, 0.01, .01, 1, "Damp");
 const gSliderContainer = makeSlider(gRow, 10, 0., .01, 0, "g");
 const speedSliderContainer = makeSlider(speedRow, 7, 0.1, .01, 2, "Speed");
 //Colors
@@ -125,7 +125,7 @@ function updateSliderLabels(){
 };
 
 //Setting default
-showVCheckboxContainer.checkbox.checked =true;
+showVCheckboxContainer.checkbox.checked = true;
 
 //overwritting the original selectBody function
 body.prototype.selectBody = (b)=> {
@@ -187,6 +187,11 @@ for (var sliderContainer of [redSliderContainer,
   sliderContainer.slider.oninput = updateColor;
 };
 
+//Now, to make the collisions work properly we give it a function that changes the global damping
+dampingSliderContainer.slider.oninput = function(){
+  damping = Number(this.value);
+};
+
 //Now the commands functionality
 startButton.onclick = function(){
   running = true;
@@ -202,6 +207,7 @@ body.prototype.evolve = function(){
   b.wallDetectionAndHandlingAll(); //Ensures nothing moves inside the wall!!! This breaks everything!!!!
 
   if (running){
+    b.addVerticalAcceleration(); //Handling gravity
     b.moveAll(Number(speedSliderContainer.slider.value));
   };
 
@@ -215,15 +221,29 @@ body.prototype.evolve = function(){
 //For the addingMode we must override the original canvasClick funciton.
 //This time it will balls if the checkbox is ticked
 function addBody(e){
-  const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
+  const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale, ctx);
   const b = new body(...point, 0, 0, 10);
+};
+//Lets do the same to remove object
+function removeSelectedBody(){
+  if (!body.prototype.selectedBody){return;};
+  //eLSE
+  const b = body.prototype.selectedBody;
+  const index = body.prototype.bodies.indexOf(b);
+  body.prototype.bodies.splice(index, 1);
+  //The data does not have to be deleted bevause js is garbage collected.
 };
 //Lets attach some mouseEvents to the canvas
 function mousePressed(e){
   if (!canvas.isMouseOver){return;};
   const b = body.prototype.selectedBody;
   if (body.prototype.isMouseOver(e)){
-    body.prototype.startDragging();
+    if (!removeCheckboxContainer.checkbox.checked){
+      body.prototype.startDragging();
+    } else {
+      removeSelectedBody();
+      body.prototype.unSelectBody();
+    };
     return;
   };
   body.prototype.unSelectBody();
@@ -233,3 +253,12 @@ function mousePressed(e){
   canvasPressed(e);
 };
 canvas.onmousedown = mousePressed;
+
+//Now we also want a function that gives acceleration to bodies. (Mostly because this is how we add gravitational acceleration)
+body.prototype.addVerticalAcceleration = function(){
+  const g = Number(gSliderContainer.slider.value);
+  const dvy = g*Number(speedSliderContainer.slider.value)/1000;
+  for (var b of body.prototype.bodies){
+    b.vy+=dvy;
+  };
+};

@@ -1,4 +1,6 @@
-
+/*
+Author: p479h
+*/
 
 //First we take the canvas from the document.
 if (document.getElementsByTagName("canvas").length>0){
@@ -17,6 +19,7 @@ if (document.getElementsByTagName("canvas").length>0){
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d", {alpha: false});//alpha false optimizes
 let running = true;//So we can pause the simulation
+let damping = 1;
 
 
 //Now we modify the canvas to simulate a p5 canvas
@@ -38,8 +41,8 @@ const universe = {
 
 //Updated universe after a transformation has been applied to the canvas
 universe.updatePoints = function(){
-  const origin = invertCoordinates(0, 0);
-  const rightBottomCorner = invertCoordinates(canvas.width, canvas.height);
+  const origin = invertCoordinates(0, 0, ctx);
+  const rightBottomCorner = invertCoordinates(canvas.width, canvas.height, ctx);
   universe.x0 = Math.floor(origin[0]);//Integers are more efficient
   universe.y0 = Math.floor(origin[1]);
   universe.x1 = Math.floor(rightBottomCorner[0]);
@@ -49,7 +52,7 @@ universe.updatePoints = function(){
 };
 
 //Gives the coordinates of x,y with inverse transform to the canvas transform
-function invertCoordinates(x, y){
+function invertCoordinates(x, y, ctx){
   const t = ctx.getTransform(); //transform
   const M = t.a*t.d-t.b*t.c;//Factor that shows up a lot
   const xnew = (x*t.d-y*t.c+t.c*t.f-t.d*t.e)/M;
@@ -110,16 +113,36 @@ function drawGrid(sideLen=50){
 
   //Translate canvas back!!!!
   ctx.translate(-Math.floor(universe.x0/dw)*dw, 0);
+
+
+  //Draw the frame!!!
+  universe.updatePoints();
+  ctx.strokeStyle = "white";
+  ctx.lineWidth = 6/ctx.getTransform().a;
+  ctx.beginPath();
+  ctx.moveTo(universe.x0, universe.y0);
+  ctx.lineTo(universe.x0, universe.y0+universe.h);
+  ctx.lineTo(universe.x0+universe.w, universe.y0+universe.h);
+  ctx.lineTo(universe.x0+universe.w, universe.y0);
+  ctx.closePath();
+  ctx.stroke();
 };
 
 //Canvas functions must not take action when the cursor lies outside the canvas
 canvasMouseIn = function(){
   canvas.isMouseOver = true;
+
+  //The document can no longer be scrolled
+  document.body.style.overflow = "hidden";
+
+  //Nice cursor
+  canvas.style.cursor = "grab";
 };
 
 //Canvas functions must not take action when the cursor lies outside the canvas
 canvasMouseOut = function(){
   canvas.isMouseOver = false;
+  document.body.style.overflow = "auto";
 };
 
 
@@ -128,8 +151,9 @@ function canvasPressed(e){
   //Set required tags and save required values
   if (!canvas.isMouseOver){return;};
   canvas.isPressed = true;
-  canvas.clickedCoords = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
+  canvas.clickedCoords = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale, ctx);
   canvas.initTransform = ctx.getTransform();
+  canvas.style.cursor = "grabbing";
 };
 
 
@@ -141,7 +165,7 @@ function canvasDragged(e){
   universe.updatePoints();
 
   //Get the displacement
-  const newCoords = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
+  const newCoords = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale, ctx);
   const dx = newCoords[0] - canvas.clickedCoords[0];
   const dy = newCoords[1] - canvas.clickedCoords[1];
 
@@ -152,21 +176,32 @@ function canvasDragged(e){
 //Handles mouse release actions that affect the canvas
 function canvasReleased(){
   canvas.isPressed = false;
+  canvas.style.cursor = "grab";
 };
 
 
 //Zoomming in and out
 function canvasWheel(e){
-  const t = ctx.getTransform();
-  if (t.a<.5){
-    ctx.setTransform(.51,t.b,t.c,.51, t.e,t.f);
-    return;
-  } else if (t.a > 5) {
-    ctx.setTransform(4.99,t.b,t.c,4.99, t.e,t.f);
+  //Follows the untransformd mousePosition
+  let t = ctx.getTransform();
+  const mouseLoc = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale, ctx);
+  let change = e.deltaY/1000; //Change in coordinates
+  const scale = 1 + change;
+  if (scale*t.a>5.0 || scale*t.a<.2){
+    change = 0;
+    if (scale*t.a<.2){
+      ctx.setTransform(.2,t.b,t.c,.2, t.e,t.f);
+    } else if (scale*t.a> 5) {
+      ctx.setTransform(5,t.b,t.c,5, t.e,t.f);
+    };
+    universe.updatePoints();
     return;
   };
-  const change = e.deltaY/5000;
-  ctx.setTransform(t.a+change,t.b,t.c,t.d+change, t.e,t.f);
+  ctx.translate(...mouseLoc);
+  ctx.scale(scale, scale);
+  ctx.translate(-mouseLoc[0], -mouseLoc[1]);
+  t = ctx.getTransform();
+  // ctx.setTransform(t.a+change,t.b,t.c,t.d+change, t.e,t.f);
   universe.updatePoints();
 };
 
@@ -230,17 +265,17 @@ body.prototype.moveAll = function(dt = 1){
 body.prototype.wallDetectionAndHandling = function(){
   /*This bounces the object from the wall.*/
   if (this.x+this.r>universe.x1){
-    this.vx*=-1;
+    this.vx*=-1*damping;
     this.x = universe.x1 - this.r;
   } else if (this.x -this.r < universe.x0){
-    this.vx*=-1;
+    this.vx*=-1*damping;
     this.x = this.r+universe.x0;
   };
   if (this.y+this.r>universe.y1){
-    this.vy*=-1;
+    this.vy*=-1*damping;
     this.y = universe.y1-this.r;
   } else if (this.y -this.r < universe.y0){
-    this.vy*=-1;
+    this.vy*=-1*damping;
     this.y = this.r+universe.y0;
   };
 };
@@ -263,7 +298,9 @@ body.prototype.checkAndHandleCollisionAll = function(){
     for (var j=i+1; j < bodies.length; j++){
       const b1 = bodies[i];
       const b2 = bodies[j];
-      if (Math.sqrt((b1.x-b2.x)**2+(b1.y-b2.y)**2) < b1.r+b2.r){
+      if ((b1.x-b2.x)**2>(b1.r+b2.r)**2){continue;};//efficiency
+      if ((b1.y-b2.y)**2>(b1.r+b2.r)**2){continue;};
+      if ((b1.x-b2.x)**2+(b1.y-b2.y)**2 < (b1.r+b2.r)**2){
         b1.collideWith(b2);//This function does anything we want after collision
       };
     };
@@ -312,7 +349,7 @@ https://wikimedia.org/api/rest_v1/media/math/render/svg/14d5feb68844edae9e31c9cb
 
 body.prototype.collideWith = function(b2){
   //This function updates velocities and positions!
-  //Two bodies can't ocupy the same location
+  //Two bodies can't ocupy the same location!!!
 
   //Here we save some values
   const vx1 = this.vx;
@@ -320,12 +357,27 @@ body.prototype.collideWith = function(b2){
   const vx2 = b2.vx;
   const vy2 = b2.vy;
 
-  //Now we save some vectors and scalars
-  const x12 = b2.x - this.x;
-  const y12 = b2.y - this.y;
-  const r = x12**2 +y12**2;
+  //Lets save these values
+  let x12 = b2.x - this.x;
+  let y12 = b2.y - this.y;
+
+  //Make the balls no longer overlap
+  //This step is VERY important
+  let dist = Math.sqrt(x12**2 + y12**2);//Only used once. But not constant!
+  const xOffset = (this.r+b2.r - dist)*x12/dist;
+  const yOffset = (this.r+b2.r - dist)*y12/dist;
+  b2.x += 1/2*xOffset;
+  b2.y += 1/2*yOffset;
+  this.x -= 1/2*xOffset;
+  this.y -= 1/2*yOffset;
+
+  //Constant that shows up more than once
   const mt = this.m + b2.m;
+  const r = (b2.x-this.x)**2 + (b2.y-this.y)**2;
   const dotProd = (vx1-vx2)*(this.x-b2.x) + (vy1-vy2)*(this.y-b2.y);
+  //Note that x12 and y12 changed!
+  x12 = b2.x - this.x;
+  y12 = b2.y - this.y;
 
   //Calculate new velocities
   const newVx1 = vx1 - 2*b2.m*-x12*dotProd/(mt*r);
@@ -335,20 +387,8 @@ body.prototype.collideWith = function(b2){
   const newVy2 = vy2 - 2*this.m*y12*dotProd/(mt*r);
 
   //Set new velocities
-  this.vx = newVx1; this.vy = newVy1;
-  b2.vx = newVx2; b2.vy = newVy2;
-
-  //Make the balls no longer overlap
-  //This step is VERY important
-  const dist = Math.sqrt(r);
-  const xvec = (this.r+b2.r)*x12/dist;
-  const yvec = (this.r+b2.r)*y12/dist;
-  const xinit = b2.x;
-  const yinit = b2.y;
-  b2.x = this.x+xvec;
-  b2.y = this.y+yvec;
-  this.x = xinit-xvec;
-  this.y = yinit-yvec;
+  this.vx = newVx1*damping; this.vy = newVy1*damping;
+  b2.vx = newVx2*damping; b2.vy = newVy2*damping;
 };
 
 //Random rbg color generator
@@ -362,7 +402,7 @@ function generateColor(){
 
 //Now we check for mouseclick
 body.prototype.isMouseOver = function(e){
-  const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
+  const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale, ctx);
   for (var b of body.prototype.bodies){
     if ((b.x-point[0])**2+(b.y-point[1])**2<b.r**2){
       body.prototype.unSelectBody();
@@ -408,9 +448,11 @@ body.prototype.unSelectBody = ()=> {
 //Applies many functions to make the system evolve in time
 body.prototype.evolve = function(){
   const b = body.prototype;
-  b.checkAndHandleCollisionAll(); //Must be first!!
-  b.wallDetectionAndHandlingAll(); //Ensures nothing moves inside the wall!!! This breaks everything!!!!
-  b.moveAll();
+  for (let i=0; i<25; i++){
+    b.checkAndHandleCollisionAll(); //Must be first!!
+    b.wallDetectionAndHandlingAll(); //Ensures nothing moves inside the wall!!! This breaks everything!!!!
+    b.moveAll();
+  };
   b.drawAll();
   b.drawVArrowAll();
 };
@@ -418,24 +460,9 @@ body.prototype.evolve = function(){
 //Makes a body move to where the mouse is
 body.prototype.moveToMouse = (e)=>{
   const b = body.prototype.selectedBody;
-  const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale);
+  const point = invertCoordinates(e.offsetX*universe.scale, e.offsetY*universe.scale, ctx);
   b.x = point[0];
   b.y = point[1];
-};
-
-
-//Lets make some bodies
-for (var i=0; i < 7; i++){
-  const rand = Math.random;
-  for (var j =0; j<7; j++){
-    const x = i*60;
-    const y = j*60;
-    const vx = rand()**6-rand()**6;
-    const vy = rand()**6-rand()**6;
-    const r = Math.floor(rand()*8+10);
-    const b = new body(x, y, vx, vy, r);
-    b.m = i*.2+1;
-  };
 };
 
 
@@ -480,6 +507,23 @@ canvas.addEventListener("wheel", canvasWheel);
 
 //Lets make the canvas look fantastisch
 improveImage(2);
+
+//Lets make some bodies
+for (var i=0; i < 1; i++){
+  const rand = Math.random;
+  for (var j =0; j<5; j++){
+    const x = i*60;
+    const y = j*60;
+    const vx = rand()**6-rand()**6;
+    const vy = rand()**6-rand()**6;
+    const r = Math.floor(rand()*8+10);
+    const b = new body(x, y, vx, vy, r);
+    b.m = i*.2+1;
+  };
+};
+
+// ctx.scale(1/2, 1/2);
+// universe.updatePoints();
 
 //Now we begin the simulation
 function run(){
