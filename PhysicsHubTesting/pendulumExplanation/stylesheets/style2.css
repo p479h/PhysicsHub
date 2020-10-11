@@ -1,0 +1,128 @@
+/* This file has mainly stuff from the second picture */
+
+svg #bob2, svg #string2{
+  transform: translate(50%, 0) rotateZ(-40deg) scale(1.2, 1.2);
+}
+
+svg #arrow2, svg #arrow3, svg #arrow4, svg #arrow5, #arrow3_, #arrow5_{
+  transform: translate(50%, 0%) scale(7, 7);
+  stroke: white;
+  fill: white;
+  stroke-width: .5;
+}
+
+svg #arrow3{
+  transform: translate(50%, 0%) scale(4.5, 4.5) rotateZ(50deg);
+}
+
+#arrow3_{
+  transform: translate(50%, 0%) scale(3, 3) rotateZ(0deg);
+}
+
+svg #arrow4{
+  transform: translate(50%, 0%) rotateZ(-40deg) translate(0, 72%) rotateZ(90deg) scale(4.5, 4.5);
+}
+
+svg #arrow5, #arrow5_{
+  transform: translate(50%, 0%) rotateZ(0deg) translate(0, 40%) rotateZ(90deg) scale(3.5, 3.5);
+}
+
+#ang90_1, #ang90_2, #ang90_3{
+  fill:black;
+  stroke-width:2;
+  stroke:white;
+  transform: translate(50%, 0%) rotate(50deg) translate(15px, 15px);
+  stroke-dasharray: 5 5;
+}
+
+#ang90_2{
+  fill: none;
+  transform: translate(50.5%, 41%) translate(-15px, -15px) scale(.8, .8);
+}
+
+#ang90_3{
+  transform: translate(50%, 0%) rotate(-40deg) translate(0, 72%) translate(-15px, -15px);
+}
+
+#theta1{
+  transform: translate(52%, 15%);
+}
+
+#theta2, #theta2_{
+  transform: translate(30%, 32%);
+}
+
+#varphi1, #varphi1_{
+  transform: translate(45%, 15%);
+}
+#varphi2{
+  transform: translate(55%, 70%);
+}
+#weight2 *{
+  transition-duration: 1s;
+}
+
+#weight2:hover #varphi1, #weight2:hover #varphi2,
+#weight2:hover #varphi1_, #weight2:hover #theta2_,
+#weight2:hover #theta1, #weight2:hover #theta2,
+#weight2:hover #ang90_3, #weight2:hover #ang90_2,
+#weight2:hover #ang90_1, #weight2:hover #weightVec2{
+  opacity: 0;
+}
+
+#weight2:hover #Fy, #weight2:hover #Fy2,
+#weight2:hover #Fx, #weight2:hover #Fx2 ,
+#weight2:hover #Fperp, #weight2:hover #Fperp2,
+#weight2:hover #Fparallel ,
+#weight2:hover #FyFormula, #weight2:hover #FxFormula,
+#weight2:hover #FperpFormula, #weight2:hover #FparallelFormula{
+  opacity: 1;
+}
+
+#weightVec2{
+  transform: translate(45%, 60%) scale(1.5, 1.5);
+}
+
+#Fx{
+  transform: translate(40%, 45%);
+}
+
+#Fx2{
+  transform: translate(40%, 35%);
+}
+
+#Fy, #Fy2{
+  transform: translate(45%, 25%);
+}
+
+#Fperp{
+  transform: translate(65%, 75%);
+}
+
+#Fperp2{
+  transform: translate(30%, 18%);
+}
+
+#Fparallel{
+  transform: translate(65%, 25%);
+}
+
+#Fy, #Fy2, #Fx, #Fx2, #Fperp, #Fperp2, #Fparallel{
+  opacity: 0;
+  transition: 1s;
+}
+
+
+#FperpFormula{
+  transform: translate(0%, 12%);
+}
+#FxFormula{
+  transform: translate(0%, 24%);
+}
+#FyFormula{
+  transform: translate(0%, 36%);
+}
+
+#FyFormula, #FxFormula, #FperpFormula, #FparallelFormula{
+  opacity: 0;
+}
